@@ -14,8 +14,9 @@ by Pacman agents (in searchAgents.py).
 """
 
 import util
-import queue
 from util import Stack
+from util import PriorityQueue
+from util import Queue
 
 
 class SearchProblem:
@@ -59,6 +60,15 @@ class SearchProblem:
         """
         util.raiseNotDefined()
 
+    def getNextState(self, state, action):
+        """
+          state: Search state
+          action: action taken at state
+
+        For a given state, this should return the next state after taking action from state.
+        """
+        util.raiseNotDefined()
+
     def getActionCost(self, state, action, next_state):
         """
           state: Search state
@@ -66,15 +76,6 @@ class SearchProblem:
           next_state: next Search state after taking action.
 
         For a given state, this should return the cost of the (s, a, s') transition.
-        """
-        util.raiseNotDefined()
-
-    def getNextState(self, state, action):
-        """
-          state: Search state
-          action: action taken at state
-
-        For a given state, this should return the next state after taking action from state.
         """
         util.raiseNotDefined()
 
@@ -101,80 +102,73 @@ def tinyMazeSearch(problem):
 
 
 def depthFirstSearch(problem):
-    """
-    Search the deepest nodes in the search tree first
 
-    Your search algorithm needs to return a list of actions that reaches
-    the goal.  Make sure to implement a graph search algorithm
+    stack = Stack()
+    visited = set()
+    start_state = problem.getStartState()
 
-    To get started, you might want to try some of these simple commands to
-    understand the search problem that is being passed in:
+    vertex = {"from": None, "to": None, "current_pos": start_state}
+    stack.push(vertex)
 
-    print "Start:", problem.getStartState()
-    print "Is the start a goal?", problem.isGoalState(problem.getStartState())
-    print "Start's successors:", problem.getSuccessors(problem.getStartState())
-    """
-    "*** YOUR CODE HERE ***"
-
-    frontier = Stack()
-
-    # explored = dict() : dictionnaire des neouds explorés
-    explored = set()
-
-    # Sauvgarder l'etat courant dans une variable
-    position = problem.getStartState()
-
-    vertex = {"from": None, "to": None, "current_pos": position}
-    frontier.push(vertex)
-
-    while not frontier.isEmpty():
-        vertex = frontier.pop()
-        current_pos = vertex["current_pos"]
-        if current_pos in explored:
+    while not stack.isEmpty():
+        vertex = stack.pop()
+        current_state = vertex["current_pos"]
+        if current_state in visited:
             continue
 
-        explored.add(current_pos)
-        # Si neoud But atteint alors sortir de la boucle
-        if problem.isGoalState(current_pos):
+        visited.add(current_state)
+        if problem.isGoalState(current_state):
             break
 
-        # Si neoud But non encore atteint alors voir les autres chemins disponibles
-        for child in problem.getActions(current_pos):
-            # Si ce vertex n'est pas encore explore alors ajouter le dans frontier
-            if problem.getNextState(current_pos, child) not in explored:  # gives next state
+        for action in problem.getActions(current_state):
+            next_state = problem.getNextState(current_state, action)
+            if next_state not in visited:
                 next_vertex = {"from": vertex,
-                               "to": child, "current_pos": problem.getNextState(current_pos, child)}
-                frontier.push(next_vertex)
+                               "to": action, "current_pos": next_state}
+                stack.push(next_vertex)
+    return getPath(vertex)
 
-    # Array pour stocker les actions
+
+def getPath(vertex):
     actions = []
     while vertex["from"] != None:
         actions.insert(0, vertex["to"])
         vertex = vertex["from"]
-    print(actions)
     return actions
 
 
 def breadthFirstSearch(problem):
-    """
-    Search the shallowest nodes in the search tree first.
-    """
-    "*** YOUR CODE HERE ***"
-    # declaring queue for storing frontiers
-    frontier = queue.Queue()
+    queue = Queue()
 
-    # explored = dict()
-    explored = dict()
+    visited = set()
 
-    # stroring current state in a variable
-    position = problem.getStartState()
+    start_state = problem.getStartState()
 
-    vertex = {"from": None, "to": None, "current_pos": position}
-    frontier.put(vertex)
+    vertex = {"from": None, "to": None, "current_pos": start_state}
 
-    # till frontier is not empty iterate to find path
+    print(problem.getActions(start_state))
 
-    util.raiseNotDefined()
+    queue.push(vertex)
+
+    while not queue.isEmpty():
+        vertex = queue.pop()
+        current_pos = vertex["current_pos"]
+        if current_pos in visited:
+            continue
+
+        visited.add(current_pos)
+        if problem.isGoalState(current_pos):
+            break
+
+        for action in problem.getActions(current_pos):
+            next_state = problem.getNextState(current_pos, action)
+            if next_state not in visited:
+
+                next_vertex = {"from": vertex,
+                               "to": action, "current_pos": next_state}
+                queue.push(next_vertex)
+
+    return getPath(vertex)
 
 
 def uniformCostSearch(problem):
@@ -192,9 +186,33 @@ def nullHeuristic(state, problem=None):
 
 
 def aStarSearch(problem, heuristic=nullHeuristic):
-    "Search the node that has the lowest combined cost and heuristic first."
-    "*** YOUR CODE HERE ***"
-    util.raiseNotDefined()
+    start = problem.getStartState()
+    queue = PriorityQueue()
+    visited = set()
+
+    vertex = {"from": None, "to": None, "current_pos": start}
+    cost = {}
+    queue.push(vertex, 0)
+    cost[start] = 0
+
+    while not queue.isEmpty():
+        vertex = queue.pop()
+        state = vertex["current_pos"]
+        if problem.isGoalState(state):
+            break
+
+        visited.add(vertex["current_pos"])
+
+        for next_state, action, stepCost in problem.expand(state):
+            new_cost = cost[state] + stepCost
+            if next_state not in visited:
+                cost[next_state] = new_cost
+                total_cost = new_cost + heuristic(next_state, problem)
+                next_vertex = {"from": vertex, "to": action,
+                               "current_pos": next_state}
+                queue.update(next_vertex, total_cost)
+
+    return getPath(vertex)
 
 
 # Abbreviations

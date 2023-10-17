@@ -1,16 +1,22 @@
-def dfs(problem, state, visited, path):
+def depthFirstSearch(problem, state=None, visited=None, vertex=None):
 
     if problem.isGoalState(state):
-        return path
-    if path is None:
         path = []
+        while vertex["from"] != None:
+            path.insert(0, vertex["to"])
+            vertex = vertex["from"]
+        return path
+
+    if state is None:
+        state = problem.getStartState()
+
     if visited is None:
         visited = set()
 
-    print("state : ", state, "actions : ", problem.getActions(state))
-
-    for child in problem.getActions(state):
-        if problem.getNextState(state, child) not in visited:
-            visited.add(problem.getNextState(state, child))
-            path.append(child)
-            return dfs(problem, problem.getNextState(state, child), visited, path)
+    for action in problem.getActions(state):
+        child = problem.getNextState(state, action)
+        if problem.getNextState(state, action) not in visited:
+            new_vertex = {"from": vertex, "to": action,
+                          "current_state": child}
+            visited.add(child)
+    return depthFirstSearch(problem, child, visited, new_vertex)

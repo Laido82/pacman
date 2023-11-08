@@ -95,6 +95,7 @@ def tinyMazeSearch(problem):
     maze, the sequence of moves will be incorrect, so only use this for tinyMaze
     """
     from game import Directions
+
     s = Directions.SOUTH
     w = Directions.WEST
     e = Directions.EAST
@@ -102,7 +103,6 @@ def tinyMazeSearch(problem):
 
 
 def depthFirstSearch(problem):
-
     stack = Stack()
     visited = set()
     start_state = problem.getStartState()
@@ -123,8 +123,7 @@ def depthFirstSearch(problem):
         for action in problem.getActions(current_state):
             next_state = problem.getNextState(current_state, action)
             if next_state not in visited:
-                next_vertex = {"from": vertex,
-                               "to": action, "current_pos": next_state}
+                next_vertex = {"from": vertex, "to": action, "current_pos": next_state}
                 stack.push(next_vertex)
     return getPath(vertex)
 
@@ -163,16 +162,14 @@ def breadthFirstSearch(problem):
         for action in problem.getActions(current_pos):
             next_state = problem.getNextState(current_pos, action)
             if next_state not in visited:
-
-                next_vertex = {"from": vertex,
-                               "to": action, "current_pos": next_state}
+                next_vertex = {"from": vertex, "to": action, "current_pos": next_state}
                 queue.push(next_vertex)
 
     return getPath(vertex)
 
 
 def uniformCostSearch(problem):
-    "Search the node of least total cost first. "
+    "Search the node of least total cost first."
     "*** YOUR CODE HERE ***"
     util.raiseNotDefined()
 
@@ -208,8 +205,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
             if next_state not in visited:
                 cost[next_state] = new_cost
                 total_cost = new_cost + heuristic(next_state, problem)
-                next_vertex = {"from": vertex, "to": action,
-                               "current_pos": next_state}
+                next_vertex = {"from": vertex, "to": action, "current_pos": next_state}
                 queue.update(next_vertex, total_cost)
 
     return getPath(vertex)
